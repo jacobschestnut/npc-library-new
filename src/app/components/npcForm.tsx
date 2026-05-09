@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { createClient } from "../../lib/supabase/client"
+import { useState } from "react"
 
 type NPCFormProps = {
   onCreated?: () => void;
@@ -10,15 +9,13 @@ type NPCFormProps = {
 };
 
 export default function NPCForm({ onCreated, isVisible, closeForm }: NPCFormProps) {
-  const supabase = createClient();
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
-  const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
       const res = await fetch("/api/npc", {
@@ -26,44 +23,25 @@ export default function NPCForm({ onCreated, isVisible, closeForm }: NPCFormProp
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, desc, userId }),
-      })
+        body: JSON.stringify({ name, desc }),
+      });
 
       if (!res.ok) {
-        throw new Error("Failed to create NPC")
+        throw new Error("Failed to create NPC");
       }
 
-      setName("")
-      setDesc("")
+      setName("");
+      setDesc("");
+
       onCreated?.();
       closeForm?.();
     } catch (err) {
-      console.error(err)
-      alert("Error creating NPC")
+      console.error(err);
+      alert("Error creating NPC");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-
-      if (error) {
-        console.error("Error fetching user:", error.message);
-        return;
-      }
-
-      if (user) {
-        setUserId(user.id);
-      }
-    };
-
-    fetchUser();
-  }, []);
 
   return (
   <div className="flex flex-col gap-2">

@@ -1,7 +1,7 @@
-import { prisma } from "@/src/lib/prisma";
+import { prisma } from "../../../../../lib/prisma";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3 } from "@/src/lib/s3";
+import { s3 } from "../../../../../lib/s3";
 
 export async function GET(
   req: Request,

@@ -1,8 +1,29 @@
-import { prisma } from '@/src/lib/prisma'
+import { prisma } from "../../../lib/prisma";
+import { createClient } from "../../../lib/supabase/server";
 
 export async function GET() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  console.log("USER:", user);
+
+  if (error || !user) {
+    return Response.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
-    const npcs = await prisma.nonPlayableCharacter.findMany();
+    const npcs = await prisma.nonPlayableCharacter.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
 
     return Response.json(npcs);
   } catch (err) {
@@ -19,13 +40,24 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await req.json();
 
   const npc = await prisma.nonPlayableCharacter.create({
     data: {
       name: body.name,
       desc: body.desc,
-      userId: body.userId
+      userId: user.id,
     },
   });
 

@@ -53,6 +53,7 @@ export default function AudioRecorder({
       method: "PUT",
       headers: {
         "Content-Type": "audio/webm",
+        "Cache-Control": "no-cache"
       },
       body: blob,
     });
