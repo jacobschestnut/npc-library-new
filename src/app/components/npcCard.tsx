@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AudioRecorder from "./audioRecorder";
-import { NPC } from "@/src/types/NPC";
+import { NPC } from "../../types/NPC";
 
 type NPCCardProps = {
   npc: NPC;

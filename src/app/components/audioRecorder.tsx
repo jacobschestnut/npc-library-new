@@ -1,6 +1,6 @@
 "use client";
 
-import { NPC } from "@/src/types/NPC";
+import { NPC } from "../../types/NPC";
 import { useEffect, useRef, useState, useCallback } from "react";
 
 interface AudioRecorderProps {
