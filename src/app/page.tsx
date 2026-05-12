@@ -16,11 +16,13 @@ export default function Home() {
         const res = await fetch("/api/npc");
         const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error("Error fetchign NPCs");
-        setNPCs([]);
-      }
-      setNPCs(data);
+        if (!res.ok) {
+          throw new Error("Error fetching NPCs");
+          setNPCs([]);
+        }
+
+        setNPCs(data);
+
       } catch (error) {
         console.log(error);
         setNPCs([]);

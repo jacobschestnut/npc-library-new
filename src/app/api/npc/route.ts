@@ -4,6 +4,8 @@ import { createClient } from "../../../lib/supabase/server";
 export async function GET() {
   const supabase = await createClient();
 
+  console.log("DB URL:", process.env.DATABASE_URL)
+
   const {
     data: { user },
     error,
