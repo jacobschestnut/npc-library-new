@@ -1,73 +1,74 @@
-import { prisma } from "../../../lib/prisma";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient } from "../../../lib/supabase/server"
 
 export async function GET() {
-  const supabase = await createClient();
-
-  console.log("ALL ENV DB:", {
-    DATABASE_URL: process.env.DATABASE_URL,
-    DIRECT_URL: process.env.DIRECT_URL,
-  })
-
-  const result = await prisma.$queryRaw`SELECT 1 as ok`
-  console.log("TEST", result)
+  const supabase = await createClient()
 
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser();
-
-  console.log("USER:", user);
+  } = await supabase.auth.getUser()
 
   if (error || !user) {
     return Response.json(
       { error: "Unauthorized" },
       { status: 401 }
-    );
+    )
   }
 
-  try {
-    const npcs = await prisma.nonPlayableCharacter.findMany({
-      where: {
-        userId: user.id,
-      },
-    });
+  const { data: npcs, error: dbError } = await supabase
+    .from("NonPlayableCharacter")
+    .select("*")
+    .eq("userId", user.id)
 
-    return Response.json(npcs);
-  } catch (err) {
-    console.error("PRISMA ERROR:", err);
-
+  if (dbError) {
     return Response.json(
       {
         error: "Failed to fetch NPCs",
-        detail: String(err),
+        detail: dbError.message,
       },
       { status: 500 }
-    );
+    )
   }
+
+  return Response.json(npcs)
 }
 
 export async function POST(req: Request) {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   if (error || !user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    )
   }
 
-  const body = await req.json();
+  const body = await req.json()
 
-  const npc = await prisma.nonPlayableCharacter.create({
-    data: {
+  const { data: npc, error: dbError } = await supabase
+    .from("NonPlayableCharacter")
+    .insert({
       name: body.name,
       desc: body.desc,
       userId: user.id,
-    },
-  });
+    })
+    .select()
+    .single()
 
-  return Response.json(npc);
+  if (dbError) {
+    return Response.json(
+      {
+        error: "Failed to create NPC",
+        detail: dbError.message,
+      },
+      { status: 500 }
+    )
+  }
+
+  return Response.json(npc)
 }
