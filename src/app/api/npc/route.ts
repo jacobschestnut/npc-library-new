@@ -4,10 +4,13 @@ import { createClient } from "../../../lib/supabase/server";
 export async function GET() {
   const supabase = await createClient();
 
-  const test = await fetch("https://aws-0-us-east-1.pooler.supabase.com:6543")
-  console.log("TEST", test)
+  console.log("ALL ENV DB:", {
+    DATABASE_URL: process.env.DATABASE_URL,
+    DIRECT_URL: process.env.DIRECT_URL,
+  })
 
-  console.log("DB URL:", process.env.DATABASE_URL)
+  const result = await prisma.$queryRaw`SELECT 1 as ok`
+  console.log("TEST", result)
 
   const {
     data: { user },
