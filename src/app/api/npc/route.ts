@@ -1,38 +1,45 @@
 import { createClient } from "../../../lib/supabase/server"
-
 export async function GET() {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
 
-  if (error || !user) {
+    if (authError || !user) {
+      return Response.json(
+        { error: "Unauthorized", authError },
+        { status: 401 }
+      )
+    }
+
+    console.log("USER ID:", user.id)
+
+    const { data, error: dbError } = await supabase
+      .from("NonPlayableCharacter")
+      .select("*")
+      .eq("userId", user.id)
+
+    if (dbError) {
+      console.log("DB ERROR:", dbError)
+      return Response.json(
+        { error: "DB failed", detail: dbError },
+        { status: 500 }
+      )
+    }
+
+    return Response.json(data)
+  } catch (err) {
+    console.log("UNEXPECTED ERROR:", err)
+
     return Response.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    )
-  }
-
-  const { data: npcs, error: dbError } = await supabase
-    .from("NonPlayableCharacter")
-    .select("*")
-    .eq("userId", user.id)
-
-  if (dbError) {
-    return Response.json(
-      {
-        error: "Failed to fetch NPCs",
-        detail: dbError.message,
-      },
+      { error: "Unexpected error", detail: String(err) },
       { status: 500 }
     )
   }
-
-  return Response.json(npcs)
 }
-
 export async function POST(req: Request) {
   const supabase = await createClient()
 

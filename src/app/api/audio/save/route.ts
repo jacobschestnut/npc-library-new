@@ -6,11 +6,23 @@ export async function POST(req: Request) {
   const { key, npcId } = await req.json()
   const id = Number(npcId)
 
-  const { data: existing } = await supabase
+  console.log("Saving audio for npcId:", id)
+
+  const { data: existing, error: fetchError } = await supabase
     .from("Audio")
     .select("*")
     .eq("npcId", id)
     .maybeSingle()
+
+  if (fetchError) {
+    console.log("FETCH ERROR:", fetchError)
+    return Response.json(
+      { success: false, error: fetchError },
+      { status: 500 }
+    )
+  }
+
+  console.log("Existing audio:", existing)
 
   let result
 
@@ -26,8 +38,9 @@ export async function POST(req: Request) {
       .single()
 
     if (error) {
+      console.log("UPDATE ERROR:", error)
       return Response.json(
-        { success: false, error: error.message },
+        { success: false, error },
         { status: 500 }
       )
     }
@@ -46,8 +59,9 @@ export async function POST(req: Request) {
       .single()
 
     if (error) {
+      console.log("INSERT ERROR:", error)
       return Response.json(
-        { success: false, error: error.message },
+        { success: false, error },
         { status: 500 }
       )
     }

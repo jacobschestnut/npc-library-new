@@ -5,11 +5,13 @@ import { s3 } from "../../../../../lib/s3"
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
+
   const supabase = await createClient()
 
-  const npcId = Number(params.id)
+  const npcId = Number(id)
 
   const { data: npc, error } = await supabase
     .from("NonPlayableCharacter")
