@@ -15,8 +15,6 @@ export async function GET() {
       )
     }
 
-    console.log("USER ID:", user.id)
-
     const { data, error: dbError } = await supabase
       .from("NonPlayableCharacter")
       .select("*")
