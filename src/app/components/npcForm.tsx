@@ -26,8 +26,11 @@ export default function NPCForm({ onCreated, isVisible, closeForm }: NPCFormProp
         body: JSON.stringify({ name, desc }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error("Failed to create NPC");
+        console.error("API Error:", data);
+        throw new Error(data.error || "Failed to create NPC");
       }
 
       setName("");

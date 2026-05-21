@@ -38,6 +38,7 @@ export async function GET() {
     )
   }
 }
+
 export async function POST(req: Request) {
   const supabase = await createClient()
 
@@ -66,10 +67,12 @@ export async function POST(req: Request) {
     .single()
 
   if (dbError) {
+    console.error("INSERT ERROR:", dbError)
+
     return Response.json(
       {
         error: "Failed to create NPC",
-        detail: dbError.message,
+        detail: dbError,
       },
       { status: 500 }
     )

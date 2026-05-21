@@ -71,9 +71,6 @@ export default function Navbar({ onToggleForm }: NavbarProps) {
       {isOpen && (
         <div className="md:hidden px-4 pb-4 space-y-2">
           <a href="#" className="block hover:text-gray-300">Home</a>
-          <a href="#" className="block hover:text-gray-300">About</a>
-          <a href="#" className="block hover:text-gray-300">Services</a>
-          <a href="#" className="block hover:text-gray-300">Contact</a>
         </div>
       )}
     </nav>

@@ -58,7 +58,10 @@ export default function Home() {
         <ul className="w-3/4 grid gap-4 grid-cols-1 2xl:grid-cols-4 list-none">
           {npcs.map((npc) => (
             <li key={npc.id} className="flex justify-center">
-              <NPCCard npc={npc} />
+              <NPCCard 
+                npc={npc}
+                setNPCs={setNPCs} 
+              />
             </li>
           ))}
         </ul>
