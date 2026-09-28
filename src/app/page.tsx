@@ -22,9 +22,8 @@ export default function Home() {
           throw new Error("Error fetching NPCs");
           setNPCs([]);
         }
-        setIsLoadingNPCs(false);
         setNPCs(data);
-
+        setIsLoadingNPCs(false);
       } catch (error) {
         console.log(error);
         setNPCs([]);
@@ -48,11 +47,7 @@ export default function Home() {
     setIsFormVisible(false)
   }
 
-  return isLoadingNPCs ? (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
-    </div>
-  ) : (
+  return (
     <div>
       <Navbar onToggleForm={() => setIsFormVisible(prev => !prev)} />
 
@@ -63,16 +58,22 @@ export default function Home() {
           closeForm={handleFormClose}
         />
 
-        <ul className="w-3/4 grid gap-4 grid-cols-1 2xl:grid-cols-4 list-none">
-          {npcs.map((npc) => (
-            <li key={npc.id} className="flex justify-center">
-              <NPCCard
-                npc={npc}
-                setNPCs={setNPCs}
-              />
-            </li>
-          ))}
-        </ul>
+        {isLoadingNPCs ? (
+          <div className="flex items-center justify-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
+          </div>
+        ) : (
+          <ul className="w-3/4 grid gap-4 grid-cols-1 2xl:grid-cols-4 list-none">
+            {npcs.map((npc) => (
+              <li key={npc.id} className="flex justify-center">
+                <NPCCard
+                  npc={npc}
+                  setNPCs={setNPCs}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
       </main>
     </div>
   );

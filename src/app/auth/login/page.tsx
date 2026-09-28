@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import { createClient } from '../../../lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
 
 export default function LoginForm() {
   const signIn = async (provider: 'github' | 'google') => {
@@ -9,13 +8,12 @@ export default function LoginForm() {
 
     const supabase = await createClient();
 
-    const headersList = await headers();
-    const origin = headersList.get('origin');
+    const redirectTo = `${process.env.SITE_URL}/auth/callback`;
 
     const { error, data } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${origin}/auth/callback`,
+        redirectTo,
       },
     });
 
