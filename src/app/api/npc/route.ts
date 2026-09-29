@@ -1,73 +1,82 @@
-import { prisma } from "../../../lib/prisma";
-import { createClient } from "../../../lib/supabase/server";
-
+import { createClient } from "../../../lib/supabase/server"
 export async function GET() {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient()
 
-  console.log("ALL ENV DB:", {
-    DATABASE_URL: process.env.DATABASE_URL,
-    DIRECT_URL: process.env.DIRECT_URL,
-  })
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
 
-  const result = await prisma.$queryRaw`SELECT 1 as ok`
-  console.log("TEST", result)
+    if (authError || !user) {
+      return Response.json(
+        { error: "Unauthorized", authError },
+        { status: 401 }
+      )
+    }
+
+    const { data, error: dbError } = await supabase
+      .from("NonPlayableCharacter")
+      .select("*")
+      .eq("userId", user.id)
+
+    if (dbError) {
+      console.log("DB ERROR:", dbError)
+      return Response.json(
+        { error: "DB failed", detail: dbError },
+        { status: 500 }
+      )
+    }
+
+    return Response.json(data)
+  } catch (err) {
+    console.log("UNEXPECTED ERROR:", err)
+
+    return Response.json(
+      { error: "Unexpected error", detail: String(err) },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(req: Request) {
+  const supabase = await createClient()
 
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser();
-
-  console.log("USER:", user);
+  } = await supabase.auth.getUser()
 
   if (error || !user) {
     return Response.json(
       { error: "Unauthorized" },
       { status: 401 }
-    );
+    )
   }
 
-  try {
-    const npcs = await prisma.nonPlayableCharacter.findMany({
-      where: {
-        userId: user.id,
-      },
-    });
+  const body = await req.json()
 
-    return Response.json(npcs);
-  } catch (err) {
-    console.error("PRISMA ERROR:", err);
-
-    return Response.json(
-      {
-        error: "Failed to fetch NPCs",
-        detail: String(err),
-      },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(req: Request) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await req.json();
-
-  const npc = await prisma.nonPlayableCharacter.create({
-    data: {
+  const { data: npc, error: dbError } = await supabase
+    .from("NonPlayableCharacter")
+    .insert({
       name: body.name,
       desc: body.desc,
       userId: user.id,
-    },
-  });
+    })
+    .select()
+    .single()
 
-  return Response.json(npc);
+  if (dbError) {
+    console.error("INSERT ERROR:", dbError)
+
+    return Response.json(
+      {
+        error: "Failed to create NPC",
+        detail: dbError,
+      },
+      { status: 500 }
+    )
+  }
+
+  return Response.json(npc)
 }

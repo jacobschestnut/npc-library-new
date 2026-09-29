@@ -21,22 +21,29 @@ export default function AudioRecorder({
   } | null>(null);
 
   const [isRecording, setIsRecording] = useState(false);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
 
   useEffect(() => {
     const loadExistingAudio = async () => {
       try {
+        setIsLoadingAudio(true);
         const res = await fetch(`/api/npc/${currentNPC.id}/audio`);
 
         if (!res.ok) return;
 
         const data = await res.json().catch(() => null);
 
-        if (!data?.url) return;
+        if (!data?.url) {
+          setIsLoadingAudio(false);
+          return;   
+        }
 
         setClip({
           id: crypto.randomUUID(),
           url: data.url,
         });
+
+        setIsLoadingAudio(false);
       } catch (err) {
         console.error("Failed to load audio:", err);
       }
@@ -140,7 +147,13 @@ export default function AudioRecorder({
         </div>
       )}
 
-      {!clip && (
+      {(!clip && isLoadingAudio) && (
+        <div className="flex items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
+        </div>
+      )}
+
+      {(!clip && !isLoadingAudio) && (
         <p className="h-12 mt-4 w-full rounded-lg px-4 py-2 text-white text-center">
           No clip found.
         </p>

@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
+export async function createClient(request: NextRequest) {
+  let response = NextResponse.next({
     request,
   });
 
@@ -19,36 +19,17 @@ export async function updateSession(request: NextRequest) {
             request.cookies.set(name, value),
           );
 
-          supabaseResponse = NextResponse.next({
+          response = NextResponse.next({
             request,
           });
 
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
+            response.cookies.set(name, value, options),
           );
         },
       },
     },
   );
 
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
-
-  const pathname = request.nextUrl.pathname;
-  const isAuthRoute = pathname.startsWith("/auth");
-  const isLoginRoute = pathname === "/login" || pathname.startsWith("/login");
-
-  if (!user && !isAuthRoute && !isLoginRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    return NextResponse.redirect(url);
-  }
-
-  if (user && pathname === "/auth/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
-  }
-
-  return supabaseResponse;
+  return { supabase, response };
 }
