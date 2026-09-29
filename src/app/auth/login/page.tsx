@@ -75,7 +75,7 @@ export default function LoginForm() {
         <form action={signIn.bind(null, 'google')}>
           <button className="hover:bg-gray-200 dark:hover:bg-gray-800 p-8 rounded-xl cursor-pointer w-full">
             <ThemedLogo
-              light="/google-logo-black.png"
+              light="/assets/google-logo-black.png"
               dark="/google-logo-white.png"
               alt="Google logo"
             />
